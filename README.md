@@ -1,5 +1,5 @@
 # Large-Number-Arithmetic
-Large number arithmetic using doubly linked list - the implementation of the class LargeInt which uses a dynamic physical structure to store the individual digits of a very large integers, and provide arithmetic operations that can be performed on them. Huge integers may be positive or negative (or zero).
+Large number arithmetic using doubly linked list - the implementation of the class LargeInt which uses a dynamic physical structure to store the individual digits of an extremely large integers (for example, prime numbers 70-digits long), and provide arithmetic operations that can be performed on them. Huge integers may be positive or negative (or zero).
 
 In particular, the class include:
 - A default constructor 
