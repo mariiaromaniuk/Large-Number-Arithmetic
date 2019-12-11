@@ -263,9 +263,9 @@ void DLinkedList<T>::deleteLast(){
 template <class T>  // Reverse list
 void DLinkedList<T>::reverse(){
     Node<T>* temp = head;
+    Node<T>* p = head;
     head = tail;
     tail = temp;
-    Node<T>* p = head;
     
     while (p!= NULL){
         temp = p->next;
