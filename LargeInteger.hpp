@@ -5,46 +5,49 @@
 //  Created by Mariia Romaniuk
 //
 
+
 #ifndef LargeInteger_hpp
 #define LargeInteger_hpp
 
-#include "DoublyLinkedList.hpp"
-#include <stdio.h>
-#include <iostream>
-using namespace std;
+
+#include "DoublyLinkedList.cpp"
 
 
 class LargeInt {
     
-public:
-    LargeInt();
-    
-    // Input & Output Operators
-    friend ostream& operator<<(ostream& out, LargeInt&);
-    friend istream& operator>>(istream& in, LargeInt&);
-    
-    // Arithmetic Operators
-    LargeInt operator+(LargeInt& b);
-    LargeInt operator-(LargeInt& b);
-    LargeInt operator/(LargeInt& b);
-    LargeInt operator*(LargeInt& b);
-    LargeInt operator%(LargeInt& b);
-    
-    // Comparison Operators
-    bool operator==(LargeInt& b);
-    bool operator>=(LargeInt& b);
-    bool operator<=(LargeInt& b);
-    bool operator>(LargeInt& b);
-    bool operator<(LargeInt& b);
-    
-    // Check if negative sign is entered
-    int negativeCheck(bool num1, bool num2);
+    // Overloaded input and output operators
+    friend ostream& operator << (ostream& out, LargeInt&);
+    friend istream& operator >> (istream& in, LargeInt&);
     
 private:
-    DLinkedList<int> add(LargeInt& a, LargeInt& b);
-    int size;
-    bool isNeg;
-    DLinkedList<int> list1;
+    DoublyLinkedList<int> list;
+    
+public:
+    // Constructor
+    LargeInt();
+    // Destructor
+    ~LargeInt();
+    
+    // Overloaded arithmetic operators
+    LargeInt operator + (LargeInt);
+    LargeInt operator - (LargeInt);
+    LargeInt operator * (LargeInt);
+    LargeInt operator / (LargeInt);
+    LargeInt operator % (LargeInt);
+    LargeInt operator = (LargeInt);
+    
+    // Helper function for overloaded * operator
+    LargeInt multiply(LargeInt, const int);
+    
+    // Overloaded comparison operators
+    bool operator == (LargeInt);
+    bool operator >= (LargeInt);
+    bool operator <= (LargeInt);
+    bool operator < (LargeInt);
+    bool operator > (LargeInt);
+    
+    // Check if number has a negative sign
+    bool isNegative();
     
 };
 
