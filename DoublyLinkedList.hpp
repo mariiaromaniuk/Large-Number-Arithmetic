@@ -2,138 +2,133 @@
 //  DoublyLinkedList.hpp
 //  Large Integer
 //
+//  Created by Mariia Romaniuk
+//
+
+
 
 #ifndef DoublyLinkedList_hpp
 #define DoublyLinkedList_hpp
 
 #include <stdio.h>
+#include <string>
 #include <iostream>
+using namespace std;
 
 
-template <class T>
+
+template <class Type>
 struct Node {
-    T data;
-    // Pointing to the next node
-    Node<T>* next;
-    // Pointing to the previous node
-    Node<T>* prev;
+    Type info;
+    Node<Type> *next;
+    Node<Type> *prev;
 };
 
-template <class T>
-class DLinkedList {
+template <class Type>
+class DoublyLinkedList {
     
-public:
-    // Default Constructor
-    DLinkedList();
-    // Copy Constructor
-    DLinkedList(DLinkedList<T> & other);
-    // Destructor
-    ~DLinkedList();
-    
-    class Iterator {
-        // Iterator class
-        friend class DLinkedList;
-        Iterator(Node<T> *newPtr) : current(newPtr) {}
-        
-    public:
-        // Iterator constructor
-        Iterator() : current(NULL) {}
-        
-        // Iterator increment
-        Iterator operator++(T data) {
-            Iterator temp = *this;
-            current = current->next;
-            return temp;
-        }
-        
-        // Iterator decrement
-        Iterator operator --(T data) {
-            Iterator temp = *this;
-            current = current->prev;
-            return temp;
-        }
-        
-        // Iterator "==" operator
-        bool operator ==(const Iterator &itr) const {
-            return current == itr.current;
-        }
-        // Iterator "!=" operator
-        bool operator !=(const Iterator &itr) const {
-            return current != itr.current;
-        }
-        
-        // Iterator "*" operator
-        T& operator *() const {
-            return current->data;
-        }
-        
-    private:
-        Node<T>* current;
-    };
-    
-    // Return a pointer that points to the beginning of the list
-    Iterator begin() const{
-        return Iterator(head);
-    }
-    // Return a pointer that points to the end of the list
-    Iterator end() const{
-        return Iterator(NULL);
-    }
-    
-    // Copy Function
-    void copy(const DLinkedList<T> &other);
-    
-    // Overloaded "=" operator
-    DLinkedList<T>& operator=(const DLinkedList<T> &other);
-    
-    // Checks if list is empty
-    bool isEmpty() const;
-    
-    // 2nd Destructor to call
-    void destroyList();
-    
-    // Remove item from the list
-    void deleteItem(T data);
-    
-    // Search the list for specific item
-    bool searchItem(T data);
-    
-    // Print the data of the list forward
-    void printForward() const;
-    
-    // Print the data of the list backward
-    void printBackward() const;
-    
-    // Add item to the front of the list
-    void insertFront(T data);
-    
-    // Add item to the end of the list
-    void insertBack(T data);
-    
-    // Replace one item with another
-    void replaceItem(T oldItem, T newItem);
-    
-    // Set the length of the list
-    void setLength(int n);
-    
-    // Get the length of the list
-    int getLength() const;
-    
-    // Delete last item of the list
-    void deleteLast();
-    
-    // Reverse order
-    void reverse();
-    
+    // Overloaded input and output operators
+    friend ostream& operator << (ostream& out, const DoublyLinkedList<Type> &);
+    friend istream& operator >> (istream& in, DoublyLinkedList<Type> &);
     
 protected:
-    // First Node of the list
-    Node<T>* head;
-    // Last Node of the list
-    Node<T>* tail;
-    // Size of the list
-    int length;
+    int length, max;
+    // Pointer to the first node
+    Node<Type> *first;
+    // Pointer to the last node
+    Node<Type> *last;
+    // Pointer to the current node
+    Node<Type> *iterator;
+    
+public:
+    // Constructor
+    DoublyLinkedList();
+    
+    // Destructor
+    ~DoublyLinkedList();
+    
+    // Copy constructor
+    DoublyLinkedList(const DoublyLinkedList<Type> &);
+    
+    // Overloaded assignment operator
+    DoublyLinkedList operator = (const DoublyLinkedList<Type> &);
+    
+    // List initialization function
+    void initializeList();
+    
+    // Function to check doubly linked list is empty
+    bool isEmpty() ;
+    
+    // Get the lengh of doubly linked list
+    int getLength();
+    
+    // Set the size of doubly linked list
+    void setLength(int n);
+    
+    // Insert item to the front of the list
+    void insertItemFront(const Type &);
+    
+    // Insert item to the back of the list
+    void insertItemBack(const Type &);
+    
+    // Function to print list forward
+    void printForward();
+    
+    // Function to print list backward
+    void printBackward();
+    
+    // Dummy function to pass the first to printForwardRec
+    void printForwardCallRec();
+    
+    // Function to print list forward recursively
+    void printForwardRec(Node<Type>*);
+    
+    // Dummy function to pass the first to printBackwardRec
+    void printBackwardCallRec();
+    
+    // Function to print list backward recursively
+    void printBackwardRec(Node<Type>*);
+    
+    // Deletes first item in the list
+    void deleteFirst();
+    
+    // Deletes last item in the list
+    void deleteLast();
+    
+    // Function that returns number of itemes in the list
+    int getNumOfItem(Type);
+    
+    // Function that replaces one item with another one
+    void replaceItem(Type, Type);
+    
+    // Dummy function to pass the first to replaceItemRec
+    void replaceItemCallRec(Type, Type);
+    
+    // Function that replaces one item with another one recursively
+    void replaceItemRec(Type, Type, Node<Type> *&);
+    
+    // Check if current next is a null pointer
+    bool isNextNull();
+    
+    // Set iterator to the first item of the list
+    void setIteratorFirst();
+    
+    // Set iterator to the last item of the list
+    void setIteratorLast();
+    
+    // Set iterator to the next node
+    void setIteratorNext();
+    
+    // Set iterator to the previous node
+    void setIteratorPrev();
+    
+    // Check if iterator finished traversing the list
+    bool didIteratorFinish();
+    
+    // Get the data from the current node
+    Type getIteratorInfo();
     
 };
 
 #endif /* DoublyLinkedList_hpp */
+
