@@ -4,11 +4,12 @@
  
  Created by Mariia Romaniuk
  
- Large number arithmetic using doubly linked list - the implementation of the class LargeInt
- which uses a dynamic physical structure to store the individual digits of a very large
- integers, and provide arithmetic operations that can be performed on them. Implementation of
- the huge integer type encapsulated as a C++ class, aggregating a list object for the internal
- representation of the huge integer value. Huge integers may be positive or negative (or zero).
+ Large number arithmetic using doubly linked list - the implementation of the class
+ LargeInt which uses a dynamic physical structure to store the individual digits of a
+ very large integers, and provide arithmetic operations that can be performed on them.
+ Implementation of the huge integer type encapsulated as a C++ class, aggregating a
+ list object for the internal representation of the huge integer value. Huge integers
+ may be positive or negative (or zero).
  
  In particular, the class include:
  - A default constructor
@@ -18,15 +19,13 @@
  - An operator function to overload the operator >>
  */
 
-#include <iostream>
-#include <string>
-#include <sstream>
-#include "DoublyLinkedList.hpp"
+
 #include "LargeInteger.hpp"
+#include <string>
+#include <iostream>
 using namespace std;
 
-
-int main() {
+int main(){
     
     LargeInt a, b, c;
     char op;
@@ -57,4 +56,5 @@ int main() {
     cout << c << endl;
     
     return 0;
+    
 }
