@@ -2,278 +2,367 @@
 //  DoublyLinkedList.cpp
 //  Large Integer
 //
+//  Created by Mariia Romaniuk
+//
+
 
 #include "DoublyLinkedList.hpp"
-#include <iostream>
-using namespace std;
 
 
-// Default constructor
-template <class T>
-DLinkedList<T>::DLinkedList(){
-    head = NULL;
-    tail = NULL;
+// Overloaded operator <<
+template <class Type>
+ostream& operator << (ostream& out, const DoublyLinkedList<Type> &other){
+    Node<Type> *current = other.first;
+    while (current != NULL){
+        out << current->info << ' ';
+        current = current->next;
+    }
+    return out;
+}
+
+
+// Overloaded operator >>
+template <class Type>
+istream& operator >> (istream& in, DoublyLinkedList<Type> &other){
+    string str;
+    in >> str[0];
+    return in;
+}
+
+
+// Constructor
+template <class Type>
+DoublyLinkedList<Type>::DoublyLinkedList(){
+    first = NULL;
+    last = NULL;
+    iterator = NULL;
     length = 0;
 }
 
+
 // Destructor
-template <class T>
-DLinkedList<T>::~DLinkedList(){
-    Node<T>* p;
-    while(head != NULL){
-        p = head;
-        head = head->next;
-        delete p;
+template <class Type>
+DoublyLinkedList <Type>::~DoublyLinkedList(){
+    Node<Type> *current;
+    while (first != NULL){
+        current = first;
+        first = first->next;
+        delete current;
     }
-    tail = NULL;
 }
 
-// Copy Constructor
-template <class T>
-DLinkedList<T>::DLinkedList(DLinkedList<T> &other){
-    head = NULL;
-    tail = NULL;
-    copy(other);
-}
 
-// Copy Function
-template <class T>
-void DLinkedList<T>::copy(const DLinkedList<T> &other){
-    if(other.head == NULL){
-        head = tail = NULL;
-        // return;
-    } else {
-        Node<T> *s = other.head;
-        head = new Node<T>;
-        head->data = s->data;
-        Node<T> *p = head;
+// Copy constructor
+template <class Type>
+DoublyLinkedList<Type>::DoublyLinkedList(const DoublyLinkedList<Type> &other){
+    max = other.max;
+    length = other.length;
+    
+    first = new Node<Type>;
+    Node<Type> *q = other.first;
+    Node<Type> *p = first;
+    
+    while (q != NULL){
+        p->info = q->info;
+        q = q->next;
         
-        while(s->next != NULL){
-            p->next = new Node<T>;
+        if (q != NULL){
+            p->next = new Node<Type>;
             p = p->next;
-            s = s->next;
-            p->data = s->data;
-            tail = p;
         }
-        p->next = NULL;
+        else {
+            p->next = NULL;
+            last = p;
+        }
     }
 }
 
-// Overloaded "=" operator
-template <class T>
-DLinkedList<T>& DLinkedList<T>::operator= (const DLinkedList<T> &other){
+
+// Overloaded assignment operator
+template <class Type>
+DoublyLinkedList<Type> DoublyLinkedList<Type>::operator = (const DoublyLinkedList<Type> &other){
     if (this != &other){
-        copy(other);
-    }
-    return *this;
-}
-
-// Checks if list is empty
-template <class T>
-bool DLinkedList<T>::isEmpty() const{
-    return head == NULL;
-}
-
-// 2nd Destructor to call
-template <class T>
-void DLinkedList<T>::destroyList(){
-    if (!isEmpty()){
-        Node<T>* p = NULL;
-        
-        while (head){
-            p = head;
-            head = head->next;
-            delete p;
+        if (other.isEmpty()){
+            first = last = NULL;
+            length = 0;
+            max = 100;
         }
-        head = tail = NULL;
-        length = 0;
-    }
-}
-
-// Remove item from the list
-template <class T>
-void DLinkedList<T>::deleteItem(T data){
-    Node<T> *p, *prevP;
-    
-    if (!head) return;       // If null, do nothing
-    
-    if (head->data == data){ // If item is in the first node
-        p = head;
-        head = head->next;
-        delete p;
-        length--;
-    } else {
-        p = head;
-    }
-    while (p != NULL && p->data != data){
-        prevP = p;
-        p = p->next;
-    }
-    if (p){                  // If item in the rest of the list
-        prevP->next = p->next;
-        delete p;
-        length--;
-    }
-    if (p == tail){
-        tail = prevP;
-    }
-}
-
-// Search the list for specific item
-template <class T>
-bool DLinkedList<T>::searchItem(T data){
-    Node<T>* p = head;
-    bool isFound = false;
-    if(data == head->data || data == tail->data){
-        isFound = true;
-    } else {
-        while (p != NULL && p->data != data){
-            p = p->next;
-        }
-        if (p)
-            isFound = true;
-    }
-    return isFound;
-}
-
-// Print list forward
-template <class T>
-void DLinkedList<T>::printForward() const{
-    if (length > 0){
-        Node<T>* p = head;
-        while (p != NULL){
-            cout << p->data << " ";
-            p = p->next;
-        }
-        cout << endl;
-    } else {
-        cout << "List is empty " << endl;
-    }
-}
-
-// Print list backward
-template <class T>
-void DLinkedList<T>::printBackward() const{
-    if (length > 0){
-        Node<T>* p = tail;
-        
-        while (p != NULL){
-            cout << p->data << " ";
-            p = p->prev;
-        }
-        cout << endl;
-    } else {
-        cout << "List is empty " << endl;
-    }
-}
-
-// Add item to the front of the list
-template <class T>
-void DLinkedList<T>::insertFront(T data){
-    Node<T>* p = new Node<T>;
-    p->data = data;
-    p->prev = NULL;
-    
-    if (length == 0){
-        p->next = NULL;
-        tail = p;
-    } else {
-        head->prev = p;
-        p->next = head;
-    }
-    
-    head = p;
-    ++length;
-}
-
-// Add item to the end of the list
-template <class T>
-void DLinkedList<T>::insertBack(T data){
-    Node<T>* p = new Node<T>;
-    p->data = data;
-    p->next = NULL;
-    
-    if (length == 0){
-        p->prev = NULL;
-        head = p;
-    } else {
-        tail->next = p;
-        p->prev = tail;
-    }
-    
-    tail = p;
-    ++length;
-}
-
-// Replace one item with another
-template <class T>
-void DLinkedList<T>::replaceItem(T oldItem, T newItem){
-    if (!isEmpty()){
-        Node<T> *p = head;
-        
-        while (p != NULL){
-            if (p->data == oldItem){
-                p->data = newItem;
-            }
-            p = p->next;
+        else {
+            first = new Node<Type>;
+            Node<Type> *p;
+            p = first;
+            Node<Type> *q = other.first;
         }
     }
 }
 
-//Set the length of the list
-template <class T>
-void DLinkedList <T>::setLength(int n){
-    length = n;
+
+// List initialization function
+template <class Type>
+void DoublyLinkedList<Type>::initializeList(){
+    first = NULL;
+    last = NULL;
+    iterator = NULL;
+    length = 0;
 }
 
-// Get the length of the list
-template <class T>
-int DLinkedList<T>::getLength() const{
+
+// Function to check if list is empty
+template <class Type>
+bool DoublyLinkedList<Type>::isEmpty(){
+    return (first == NULL);
+}
+
+
+// Get length of the list
+template <class Type>
+int DoublyLinkedList<Type>::getLength(){
     return length;
 }
 
-// Delete last item of the list
-template <class T>
-void DLinkedList<T>::deleteLast(){
+
+// Set length of the list
+template <class Type>
+void DoublyLinkedList<Type>::setLength(int n){
+    length = n;
+}
+
+
+// Insert item to the front of the list
+template <class Type>
+void DoublyLinkedList<Type>::insertItemFront(const Type &item){
+    Node<Type> *newNode;
+    newNode = new Node<Type>;
+    newNode->info = item;
+    newNode->next = NULL;
+    newNode->prev = NULL;
     
-    Node<T>* s = NULL;
-    Node<T>* p = NULL;
-    p = head;
-    
-    if (!head){
-        return;
+    if (first == NULL){
+        first = last = newNode;
+        first->prev = NULL;
+        first->next = NULL;
     }
-    if (head->next == NULL){
-        head = head->next;
-        delete p;
-        tail = head;
-    } else {
-        while(p != NULL && p != tail){
-            s = p;
-            p = p->next;
+    else {
+        newNode->next = first;
+        first->prev = newNode;
+        first = newNode;
+    }
+    length++;
+}
+
+
+// Insert item to the back of the list
+template <class Type>
+void DoublyLinkedList<Type>::insertItemBack(const Type &item){
+    Node<Type> *newNode;
+    newNode = new Node<Type>;
+    newNode->info = item;
+    newNode->next = NULL;
+    newNode->prev = NULL;
+    
+    if (first == NULL)
+        first = last = newNode;
+    else {
+        last->next = newNode;
+        newNode->prev = last;
+        last = newNode;
+    }
+    length++;
+}
+
+
+// Function to print list forward
+template <class Type>
+void DoublyLinkedList <Type>::printForward(){
+    Node<Type> *current;
+    current = first;
+    
+    while(current != NULL){
+        cout << current->info << ' ';
+        current = current->next;
+    }
+}
+
+
+// Function to print list backward
+template <class Type>
+void DoublyLinkedList<Type>::printBackward(){
+    Node<Type> *current;
+    current = last;
+    
+    while (current != NULL){
+        cout << current->info << ' ';
+        current = current->back;
+    }
+}
+
+
+// Dummy function to pass the first to printForwardRec
+template <class Type>
+void DoublyLinkedList<Type>::printForwardCallRec(){
+    printForwardRec(first);
+}
+
+
+// Function to print list forward recursively
+template <class Type>
+void DoublyLinkedList<Type>::printForwardRec(Node<Type> *p){
+    if (p != NULL){
+        cout << p->info << ' ';
+        printForwardRec(p->next);
+    }
+}
+
+
+// Dummy function to pass the first to printBackwardRec
+template <class Type>
+void DoublyLinkedList<Type>::printBackwardCallRec(){
+    printBackwardRec(first);
+}
+
+
+// Function to print list backward recursively
+template <class Type>
+void DoublyLinkedList<Type>::printBackwardRec(Node<Type> *p){
+    if (p != NULL){
+        printBackwardRec(p->next);
+        cout << p->info << ' ';
+    }
+}
+
+
+// Deletes first item in the list
+template <class Type>
+void DoublyLinkedList<Type>::deleteFirst(){
+    if (!isEmpty()){
+        Node<Type> *current = first;
+        first = first->next;
+        delete current;
+    }
+}
+
+
+// Deletes last item in the list
+template <class Type>
+void DoublyLinkedList<Type>::deleteLast(){
+    if (!isEmpty()){
+        if (first == last){
+            delete first;
+            first = last = NULL;
         }
-        if (p){
-            s->next = p->next;
-            delete p;
-            tail = s;
+        else {
+            Node<Type> *temp = last;
+            last = last->prev;
+            last->next = NULL;
+            delete temp;
+        }
+        length--;
+    }
+}
+
+
+// Function that returns number of itemes in the list
+template <class Type>
+int DoublyLinkedList<Type>::getNumOfItem(Type item){
+    if (!isEmpty()){
+        Node<Type> *current = first;
+        int count = 0;
+        
+        while (current != NULL){
+            if (current->info == item)
+                count++;
+            
+            current = current->next;
+        }
+        return count;
+    }
+    return 0;
+}
+
+
+// Function that replaces one item with another one
+template <class Type>
+void DoublyLinkedList<Type>::replaceItem(Type oldItem, Type newItem){
+    if (!isEmpty()){
+        Node<Type> *current = first;
+        
+        while (current != NULL){
+            if (current->info == oldItem)
+                current->info = newItem;
+            
+            current = current->next;
         }
     }
 }
 
-template <class T>  // Reverse list
-void DLinkedList<T>::reverse(){
-    Node<T>* temp = head;
-    Node<T>* p = head;
-    head = tail;
-    tail = temp;
-    
-    while (p!= NULL){
-        temp = p->next;
-        p->next = p->prev;
-        p->prev = temp;
-        p = p->next;
+
+// Dummy function to pass the first to replaceItemRec
+template <class Type>
+void DoublyLinkedList<Type>::replaceItemCallRec(Type oldItem, Type newItem){
+    if (!isEmpty())
+        replaceItemRec(oldItem, newItem, first);
+}
+
+
+// Function that replaces one item with another one recursively
+template <class Type>
+void DoublyLinkedList<Type>::replaceItemRec(Type oldItem, Type newItem, Node<Type> *&current){
+    if (current != NULL){
+        if (current->info == oldItem)
+            current->info = newItem;
+        
+        replaceItemRec(oldItem, newItem, current->next);
     }
 }
 
-template class DLinkedList<int>;
 
+// Function to check if current next is a null pointer
+template <class Type>
+bool DoublyLinkedList<Type>::isNextNull(){
+    if (iterator->next == NULL)
+        return true;
+    else
+        return false;
+}
+
+
+// Set iterator to the first item of the list
+template <class Type>
+void DoublyLinkedList<Type>::setIteratorFirst(){
+    iterator = first;
+}
+
+
+// Set iterator to the last item of the list
+template <class Type>
+void DoublyLinkedList<Type>::setIteratorLast(){
+    iterator = last;
+}
+
+
+// Set iterator to the next node
+template <class Type>
+void DoublyLinkedList<Type>::setIteratorNext(){
+    iterator = iterator->next;
+}
+
+
+// Set iterator to the previous node
+template <class Type>
+void DoublyLinkedList<Type>::setIteratorPrev(){
+    iterator = iterator->prev;
+}
+
+
+// Check if iterator finished traversing the list
+template <class Type>
+bool DoublyLinkedList<Type>::didIteratorFinish(){
+    return (iterator == NULL);
+}
+
+
+// Get the data from the current node
+template <class Type>
+Type DoublyLinkedList<Type>::getIteratorInfo(){
+    return iterator->info;
+}
