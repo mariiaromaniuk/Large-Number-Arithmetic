@@ -5,154 +5,331 @@
 //  Created by Mariia Romaniuk
 //
 
+
 #include "LargeInteger.hpp"
-#include "DoublyLinkedList.hpp"
-#include <sstream>
-#include <string>
-#include <iostream>
-using namespace std;
 
 
-
-LargeInt::LargeInt(){    // Constructor
-    size = 0;
-    isNeg = false;
+// Overloaded operator << prints out an array of an object backwards
+ostream& operator << (ostream& out, LargeInt &other){
+    other.list.setIteratorLast();
     
+    while (!other.list.didIteratorFinish()){
+        out << other.list.getIteratorInfo();
+        other.list.setIteratorPrev();
+    }
+    return out;
 }
 
 
-//Overload of input stream to attain numbers
-istream& operator>> (istream& in, LargeInt& number){
+// Overloaded operator >> first takes in input as a string
+// whose length determines the length of an array
+istream& operator >> (istream& in, LargeInt &other){
+    // Takes a string as input
     string str;
-    getline(in,str);
+    in >> str;
+    int item;
     
-    number.size = str.size();
-    number.isNeg = false;
-    
-    for (int i = 0; i < number.size; i++){
-        if (str[i] == '-'){
-            number.isNeg = true;
-            number.list1.insertFront(str[i+1] - '0');
-            i++;
-        }
-        else
-            number.list1.insertFront(str[i] - '0');
+    for (int i = 0; i != str.length(); i++){
+        item = (str.at(i) - '0');
+        other.list.insertItemFront(item);
     }
     return in;
 }
 
 
-// Overload of output operator to output result
-ostream& operator<< (ostream& out, LargeInt& number){
+// Default constructor
+LargeInt::LargeInt(){
+}
+
+
+// Destructor
+LargeInt::~LargeInt(){
+}
+
+
+// Overloaded addition operator returns an object of LargeInt
+LargeInt LargeInt::operator + (LargeInt other){
+    LargeInt temp;
+    temp.list.initializeList();
+    int smallerL;
+    int sumLength;
     
-    if(number.isNeg == true)
-        out << "-";
+    if (list.getLength() > other.list.getLength()){
+        sumLength = list.getLength();
+        smallerL = other.list.getLength();
+    }
+    else {
+        sumLength = other.list.getLength();
+        smallerL = list.getLength();
+    }
+    
+    temp.list.setLength(sumLength);
+    int s = 0;
+    
+    list.setIteratorFirst();
+    other.list.setIteratorFirst();
+    
+    for (int i = 0; i < sumLength; i++){
+        if (i < smallerL){
+            s += list.getIteratorInfo() + other.list.getIteratorInfo();
+            if(!list.didIteratorFinish())
+                list.setIteratorNext();
+            if(!other.list.didIteratorFinish())
+                other.list.setIteratorNext();
+        }
+        else {
+            if (sumLength == list.getLength()){
+                s += list.getIteratorInfo();
+                if (!list.didIteratorFinish())
+                    list.setIteratorNext();
+            }
+            else {
+                s += other.list.getIteratorInfo();
+                if (!other.list.didIteratorFinish())
+                    other.list.setIteratorNext();
+            }
+        }
+        
+        if (s > 9){
+            s = s -10;
+            temp.list.insertItemBack(s);
+            s = 1;
+        }
+        else {
+            temp.list.insertItemBack(s);
+            s = 0;
+        }
+    }
+    
+    if (s == 1){
+        temp.list.insertItemBack(1);
+        temp.list.setLength(sumLength + 1);
+    }
+    return temp;
+}
+
+
+// Overloaded substruction operator
+LargeInt LargeInt::operator - (LargeInt other){
+    LargeInt temp;
+    temp.list.initializeList();
+    
+    int sumLength = list.getLength() >= other.list.getLength() ? list.getLength() : other.list.getLength();
+    
+    temp.list.setLength(sumLength);
+    
+    int sign = 1;;
+    
+    if (((*this).isNegative() && !other.isNegative()) || (!(*this).isNegative() && other.isNegative())){
+        sign = -1;
+    }
     else
-        out << "";
+        sign = 1;
     
-    for (auto itr = number.list1.begin(); itr != number.list1.end(); itr++)
-        cout << *itr;
+    int s = 0;
+    int carry = 0;
+    int num1 = 0;
+    int num2 = 0;
+    bool otherBigger = false;
     
-    return out;
+    if (other > *this)
+        otherBigger = true;
     
-}
-
-
-// Overload the operator "equal" to check if numbers are equivalent
-bool LargeInt::operator== (LargeInt& b){
-    
-    bool isTrue = true;
-    int count = 0;
-    
-    if (size != b.size)
-        isTrue = false;
+    if (*this == other)
+        temp.list.insertItemFront(0);
     else {
-        auto itr = list1.begin();
-        auto itr2 = b.list1.begin();
+        list.setIteratorFirst();
+        other.list.setIteratorFirst();
         
-        while (count < b.size){
-            if(itr != itr2)
-                isTrue = false;
-            break;
-            itr++;
-            itr2++;
-        }
-    }
-    return isTrue;
-}
-
-
-// Overload the "less than" operator
-bool LargeInt::operator< (LargeInt& b){
-    
-    bool isTrue = true;
-    
-    auto itr = list1.begin();
-    auto itr2 = b.list1.begin();
-    
-    if (this->list1.getLength() < b.list1.getLength()){
-        isTrue = true;
-        
-    } else if (this->list1.getLength() > b.list1.getLength()){
-        isTrue = false;
-        
-    }
-    else {
-        for (int i = 0; i < list1.getLength(); i++){
-            if (*itr < *itr2){
-                isTrue = true;
-                break;
-            } else if (*itr == *itr2){
-                isTrue = true;
-            } else if (*itr > *itr2){
-                isTrue = false;
-                break;
+        for (int i = 0; i < sumLength; i++){
+            if (!list.didIteratorFinish()){
+                num1 = list.getIteratorInfo();
+                list.setIteratorNext();
             }
-            itr++;itr2++;
-        }
-    }
-    return isTrue;
-}
-
-
-// Overload the "greater than" operator
-bool LargeInt::operator> (LargeInt& b){
-    
-    bool isTrue = true;
-    
-    auto itr = list1.begin();
-    auto itr2 = b.list1.begin();
-    
-    if (this->list1.getLength() < b.list1.getLength()){
-        isTrue = false;
-    } else if (this->list1.getLength() > b.list1.getLength()){
-        isTrue = true;
-    } else if (*this == b) {
-        isTrue = false;
-    } else {
-        for (int i = 0; i < list1.getLength(); i++){
-            if (*itr == *itr2){
-                isTrue = true;
+            
+            if (!other.list.didIteratorFinish()){
+                num2 = other.list.getIteratorInfo();
+                other.list.setIteratorNext();
+            }
+            
+            if (!otherBigger){
+                s = num1 - (num2 + carry);
+                if (s < 0){
+                    s = (num1 + 10) - (num2 + carry);
+                    carry = 1;
+                }
+                else
+                    carry = 0;
+            }
+            
+            if (otherBigger){
+                s = num2 - (num1 + carry);
                 
-            } else if (*itr < *itr2){
-                isTrue = false;
-                break;
-            } else if (*itr > *itr2){
-                isTrue = false;
-                break;
+                if (s < 0){
+                    s = (num2 + 10) - (num1 + carry);
+                    carry = 1;
+                }
+                else
+                    carry = 0;
             }
-            itr++;itr2++;
+            
+            if (otherBigger && i == sumLength-1){
+                temp.list.insertItemBack(s*(-1));
+            }
+            else {
+                if (s == 0 && list.didIteratorFinish()){
+                }
+                else {
+                    temp.list.insertItemBack(s);
+                }
+            }
+            num1 = 0;
+            num2 = 0;
+            
+            if (s == 0 && other.list.didIteratorFinish() && otherBigger){
+                temp.list.deleteLast();
+                temp.list.setIteratorLast();
+                s = temp.list.getIteratorInfo();
+                temp.list.deleteLast();
+                temp.list.setIteratorLast();
+                temp.list.insertItemBack(s * -1);
+            }
         }
     }
-    return isTrue;
+    if (carry > 0)
+        temp.list.insertItemBack(carry);
+    
+    return temp;
+}
+
+
+// Helper function for overloaded multiplication operator
+LargeInt LargeInt::multiply(LargeInt value, const int num){
+    LargeInt temp2;
+    int carry = 0;
+    
+    for (value.list.setIteratorFirst(); !value.list.didIteratorFinish(); value.list.setIteratorNext()){
+        int sum = num*value.list.getIteratorInfo() + carry;
+        carry = sum / 10;
+        sum %= 10;
+        temp2.list.insertItemBack(sum);
+    }
+    
+    if (carry > 0)
+        temp2.list.insertItemBack(carry);
+    
+    return temp2;
+}
+
+
+// Overloaded multiplication operator
+LargeInt LargeInt::operator * (LargeInt other){
+    LargeInt product,temp;
+    int count = 0;
+    int power = 0;
+    
+    product = *this;
+    
+    for (other.list.setIteratorFirst(); !other.list.didIteratorFinish();other.list.setIteratorNext()){
+        temp = (multiply(*this, other.list.getIteratorInfo()));
+        
+        power = count;
+        if (power > 0){
+            while (power != 0){
+                temp.list.insertItemFront(0);
+                power--;
+            }
+        }
+        count++;
+        
+        if (count == 1)
+            product = temp;
+        else
+            product = product + temp;
+    }
+    return product;
+}
+
+
+// Overloaded division operator
+LargeInt LargeInt::operator / (LargeInt other){
+    LargeInt temp,temp1;
+    
+    list.setIteratorLast();
+    if (other>*this)
+        temp1.list.insertItemBack(0);
+    
+    else {
+        while (!list.didIteratorFinish()){
+            temp.list.insertItemFront(list.getIteratorInfo());
+            if (temp > other || temp == other) {
+                int count = 0;
+                while (temp == other || temp > other) {
+                    temp = temp - other;
+                    count++;
+                }
+                temp1.list.insertItemFront(count);
+            }
+            list.setIteratorPrev();
+        }
+    }
+    return temp1;
+}
+
+
+// Overloaded modulus operator
+LargeInt LargeInt::operator % (LargeInt other){
+    while (*this > other || *this == other){
+        *this = *this - other;
+    }
+    return *this;
+}
+
+
+// Overloaded assignment operator
+LargeInt LargeInt::operator = (LargeInt other){
+    if (this != &other){
+        list.initializeList();
+        
+        other.list.setIteratorFirst();
+        
+        while (!other.list.didIteratorFinish()){
+            list.insertItemBack(other.list.getIteratorInfo());
+            other.list.setIteratorNext();
+        }
+        return *this;
+    }
+    else {
+        cout << "\nparameter is the same as the calling object: ";
+        return other;
+    }
+}
+
+
+// Overloaded operator equal
+bool LargeInt::operator == (LargeInt other){
+    if (list.getLength() == other.list.getLength()){
+        list.setIteratorFirst();
+        other.list.setIteratorFirst();
+        
+        while (!list.didIteratorFinish()){
+            if (list.getIteratorInfo() != other.list.getIteratorInfo())
+                return false;
+            list.setIteratorNext();
+            other.list.setIteratorNext();
+        }
+        return true;
+    }
+    else
+        return false;
 }
 
 
 // Overload the "greater than or equal to" operator
-bool LargeInt::operator>= (LargeInt& b){
+bool LargeInt::operator >= (LargeInt other){
     bool isTrue = false;
     
-    if (*this > b || *this == b)
+    if (*this > other || *this == other)
         isTrue = true;
     
     return isTrue;
@@ -160,420 +337,58 @@ bool LargeInt::operator>= (LargeInt& b){
 
 
 // Overload the "less than or equal to" operator
-bool LargeInt::operator<= (LargeInt& b){
+bool LargeInt::operator <= (LargeInt other){
     bool isTrue = false;
     
-    if (*this < b || *this == b)
+    if (*this < other || *this == other)
         isTrue = true;
     
     return isTrue;
 }
 
 
-// Function to check if result chould be positive or negative number
-int LargeInt::negativeCheck(bool num1, bool num2) {
-    int res = 0;
-    
-    if (num1 && num2)  // Both numbers are negative
-        res = 1;
-    
-    if (!num1 && num2)  // Number 2 is positive, Number 1 is negative
-        res = 2;
-    
-    if (num1 && !num2)  // Number 1 is positive, Number 2 is negative
-        res = 3;
-    
-    return res;
-}
-
-
-// Addition function to assist in multiplication method
-DLinkedList<int> LargeInt::add(LargeInt& a, LargeInt& b) {
-    DLinkedList<int> c;
-    
-    int count = 0;
-    int carry = 0;
-    int total = 0;
-    int num = 0;
-    int bigger = b.list1.getLength();
-    
-    
-    // Check sizes of lists are equal.
-    // If not - will distribute 0's to even out addition on operands.
-    if (a.list1.getLength() != b.list1.getLength()){
-        
-        if (b.list1.getLength() > a.list1.getLength()){
-            num = b.list1.getLength() - a.list1.getLength();
-            
-            while (num > 0){
-                a.list1.insertBack(0);
-                num--;
-            }
-        } else
-            num = a.list1.getLength() - b.list1.getLength();
-        
-        bigger = a.list1.getLength();
-        
-        while (num > 0){
-            b.list1.insertBack(0);
-            num--;
-        }
-    }
-    
-    auto itr = a.list1.begin();
-    auto itr2 = b.list1.begin();
-    
-    
-    while (count < bigger ) {
-        total = (*itr + *itr2);
-        if (total > 9){
-            total += carry;
-            total -= 10;
-            carry = 1;
-            c.insertFront(total);
-            if(b.size == 1 && size == 1)
-                c.insertFront(carry);
-        }
-        else{
-            total += carry;
-            c.insertFront(total);
-            carry = 0;
-        }
-        count++; itr++; itr2++;
-    }
-    return c;
-}
-
-
-// Addition Operator to add two large integers together
-LargeInt LargeInt::operator+ (LargeInt& b){
-    LargeInt c;
-    int count = 0;
-    int carry = 0;
-    int total = 0;
-    int num = 0;
-    int bigger = b.list1.getLength();
-    
-    auto itr = list1.begin();
-    auto itr2 = b.list1.begin();
-    
-    int res = negativeCheck(this->isNeg, b.isNeg);
-    
-    if (res == 1){
-        total = (*itr + *itr2);
-        c.isNeg = true;
-    }
-    if (res == 2){
-        total = (*itr2 - *itr);
-        c.isNeg = true;
-        
-        if (*itr <= *itr2)
-            c.isNeg = false;
-        else
-            c.isNeg = true;
-    }
-    if (res == 3){
-        c.isNeg = false;
-        total = (*itr - *itr2);
-    }
-    else
-        total = (*itr + *itr2);
-    
-    
-    // Check sizes of lists are equal
-    // If not - will distribute 0's to even out addition on operands.
-    if (list1.getLength() != b.list1.getLength()){
-        
-        if (b.list1.getLength() > list1.getLength()){
-            num = b.list1.getLength() - list1.getLength();
-            
-            while (num > 0){
-                list1.insertBack(0);
-                num--;
-            }
-        }
-        else
-            num = list1.getLength() - b.list1.getLength();
-        bigger = list1.getLength();
-        
-        while(num > 0){
-            b.list1.insertBack(0);
-            num--;
-        }
-    }
-    
-    while (count < bigger) {
-        if (res == 1){
-            total = (*itr + *itr2);
-            c.isNeg = true;
-        }
-        if(res == 2){
-            total = (*itr2 - *itr);
-            c.isNeg = true;
-            
-            if(*itr <= *itr2)
-                c.isNeg = false;
-            else
-                c.isNeg = true;
-        }
-        if(res == 3){
-            c.isNeg = false;
-            total = (*itr - *itr2);
-        } else
-            total = (*itr + *itr2);
-        if(total > 9){
-            total += carry;
-            total -= 10;
-            carry = 1;
-            c.list1.insertFront(total);
-            if((b.size == 1 && size == 1)){
-                c.list1.insertFront(carry);
-            }
-        }
+// Overloaded "less then" operator
+bool LargeInt::operator < (LargeInt other){
+    if (list.getLength() > other.list.getLength())
+        return false;
+    else {
+        if (list.getLength() < other.list.getLength())
+            return true;
         else {
-            total += carry;
-            c.list1.insertFront(total);
-            carry = 0;
+            list.setIteratorLast();
+            other.list.setIteratorLast();
+            
+            if (list.getIteratorInfo() < other.list.getIteratorInfo())
+                return true;
+            else
+                return false;
         }
-        count++; itr++; itr2++;
     }
-    if (carry == 1)
-        c.list1.insertFront(carry);
-    
-    return c;
-    
 }
 
 
-// Subtraction operator to subtract two large integers together
-LargeInt LargeInt::operator- (LargeInt& b){
-    LargeInt c;
-    
-    int count = 0;
-    int carry = 0;
-    int total = 0;
-    int num = 0;
-    int bigger = b.list1.getLength();
-    
-    int combo = negativeCheck(this->isNeg, b.isNeg);
-    
-    if(list1.getLength() != b.list1.getLength()) {
-        
-        if(b.list1.getLength() > list1.getLength())
-        {
-            num = b.list1.getLength() - list1.getLength();
-            
-            while(num > 0)
-            {
-                list1.insertBack(0);
-                num--;
-            }
-        }
-        else
-            num = list1.getLength() - b.list1.getLength();
-        bigger = list1.getLength();
-        while(num > 0)
-        {
-            b.list1.insertBack(0);
-            num--;
-        }
-    }
-    
-    auto itr = list1.begin();
-    auto itr2 = b.list1.begin();
-    
-    while (count < bigger) {
-        
-        if(combo == 1){
-            total = (*itr - *itr2);
-            c.isNeg = true;
-        }
-        if(combo == 2){
-            total = (*itr2 + *itr);
-            c.isNeg = false;
-        }
-        if(combo == 3){
-            c.isNeg = false;
-            total = (*itr + *itr2);
-            
-        }
-        else
-            total = (*itr - *itr2);
-        if (total < 0)
-        {
-            total += carry;
-            total += 10;
-            carry = -1;
-            c.list1.insertFront(total);
-        }
-        
+// Overloaded "greater then" operator
+bool LargeInt::operator > (LargeInt other){
+    if (list.getLength() < other.list.getLength())
+        return false;
+    else {
+        if (list.getLength() > other.list.getLength())
+            return true;
         else{
+            list.setIteratorLast();
+            other.list.setIteratorLast();
             
-            total += carry;
-            if(total < 0){
-                total += 10;
-                carry = -1;
-                c.list1.insertFront(total);
-            }
-            else {
-                c.list1.insertFront(total);
-                carry = 0;
-            }
+            if (list.getIteratorInfo() > other.list.getIteratorInfo())
+                return true;
+            else
+                return false;
         }
-        count++; itr++; itr2++;
     }
-    return c;
-    
 }
 
 
-// Multiplication operator to multiply two large integers together.
-LargeInt LargeInt::operator* (LargeInt& b){
-    
-    LargeInt c;
-    LargeInt d, e;
-    
-    int count = 0;
-    int count2 = 0;
-    int count3 = 0;
-    int carry = 0;
-    int total = 0;
-    int zero = 0;
-    
-    int combo = negativeCheck(this->isNeg, b.isNeg);
-    
-    if(combo == 1){
-        c.isNeg = false;
-    }
-    if(combo == 2 || combo == 3){
-        c.isNeg = true;
-    }
-    
-    auto itr = list1.begin();
-    auto itr2 = b.list1.begin();
-    
-    
-    while(count2 < b.list1.getLength()){
-        carry = 0;
-        
-        while(count < list1.getLength()){
-            total += carry + (*itr2 * *itr);
-            if (total > 9)
-            {
-                carry = (total / 10);
-                total = (total % 10);
-                if(count3 == 0){
-                    d.list1.insertFront(total);
-                    total = 0;
-                    if(count + 1 == list1.getLength() && size != 1)
-                        d.list1.insertFront(carry);
-                }
-                else {
-                    e.list1.insertFront(total);
-                    total = 0;
-                    if(count + 1 == list1.getLength() && size != 1)
-                        e.list1.insertFront(carry);
-                }
-                if(b.size == 1 && size == 1){
-                    d.list1.insertFront(carry);
-                }
-            }
-            else {
-                total += carry;
-                if(count3 == 0){
-                    d.list1.insertFront(total);
-                    carry = 0;
-                    total = 0;
-                }
-                else{
-                    
-                    e.list1.insertFront(total);
-                    carry = 0;
-                    total = 0;
-                    
-                }
-            }
-            count++;itr++;
-        }
-        count2++;itr2++;count3++; itr = list1.begin();count = 0;
-    }
-    for(int i = 0; i < 1; i++){
-        e.list1.insertBack(0);
-    }
-    zero++;
-    
-    e.list1.reverse();
-    if(b.list1.getLength() <= 2)
-        d.list1.reverse();
-    
-    c.list1 = add(d,e);
-    d.list1 = c.list1;
-    d.list1.reverse();
-    e.list1.destroyList();
-    
-    return c;
-}
-
-
-// Division operator to divide two large integers from each other
-LargeInt LargeInt::operator/ (LargeInt& b){
-    
-    LargeInt c;
-    
-    int count = 0;
-    int carry = 0;
-    int total = 0;
-    
-    int res = negativeCheck(this->isNeg, b.isNeg);
-    
-    if(res == 1){
-        c.isNeg = false;
-    }
-    if(res == 2 || res == 3){
-        c.isNeg = true;
-    }
-    
-    auto itr = list1.begin();
-    auto itr2 = b.list1.begin();
-    
-    
-    while (count < list1.getLength()){
-        total = (carry + *itr) / *itr2;
-        if(total % 2 == 1)
-            carry = 10;
-        else
-            carry = 0;
-        
-        if(count + 1 == list1.getLength()){
-            total = (carry + *itr) / *itr2;
-            c.list1.insertFront(total);
-            break;
-        }
-        
-        c.list1.insertFront(total);
-        count++; itr++;
-        //total = 0;
-    }
-    
-    return c;
-}
-
-// Modulus operator to attain modulus from two large integers
-LargeInt LargeInt::operator% (LargeInt& b){
-    
-    LargeInt c;
-    int total = 0;
-    
-    auto itr = list1.begin();
-    auto itr2 = b.list1.begin();
-    
-    int count = *itr;
-    total = *itr / *itr2;
-    
-    for (int i = 0; i < total; i++)
-        count -= *itr2;
-    
-    c.list1.insertFront(count);
-    
-    return c;
+// Check if number has a negative sign
+bool LargeInt::isNegative(){
+    list.setIteratorLast();
+    return (list.getIteratorInfo() < 0)? true:false;
 }
